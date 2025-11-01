@@ -176,12 +176,10 @@ struct bucket_functor
 };
 
 template <unsigned int RadixBits,
-          typename DerivedPolicy,
           typename RandomAccessIterator1,
           typename RandomAccessIterator2,
           typename Integer>
 inline _CCCL_HOST_DEVICE void radix_shuffle_n(
-  sequential::execution_policy<DerivedPolicy>& exec,
   RandomAccessIterator1 first,
   const size_t n,
   RandomAccessIterator2 result,
@@ -192,7 +190,7 @@ inline _CCCL_HOST_DEVICE void radix_shuffle_n(
 
   // note that we are going to mutate the histogram during this sequential scatter
   thrust::scatter(
-    exec,
+    sequential::tag{},
     first,
     first + n,
     thrust::make_transform_iterator(first, bucket_functor<RadixBits, KeyType>(bit_shift, histogram)),
@@ -200,14 +198,12 @@ inline _CCCL_HOST_DEVICE void radix_shuffle_n(
 }
 
 template <unsigned int RadixBits,
-          typename DerivedPolicy,
           typename RandomAccessIterator1,
           typename RandomAccessIterator2,
           typename RandomAccessIterator3,
           typename RandomAccessIterator4,
           typename Integer>
 _CCCL_HOST_DEVICE void radix_shuffle_n(
-  sequential::execution_policy<DerivedPolicy>& exec,
   RandomAccessIterator1 keys_first,
   RandomAccessIterator2 values_first,
   const size_t n,
@@ -220,7 +216,7 @@ _CCCL_HOST_DEVICE void radix_shuffle_n(
 
   // note that we are going to mutate the histogram during this sequential scatter
   thrust::scatter(
-    exec,
+    sequential::tag{},
     thrust::make_zip_iterator(keys_first, values_first),
     thrust::make_zip_iterator(keys_first + n, values_first + n),
     thrust::make_transform_iterator(keys_first, bucket_functor<RadixBits, KeyType>(bit_shift, histogram)),
@@ -306,22 +302,22 @@ _CCCL_HOST_DEVICE void radix_sort(
       {
         if (HasValues)
         {
-          radix_shuffle_n<RadixBits>(exec, keys2, vals2, N, keys1, vals1, BitShift, histograms[i]);
+          radix_shuffle_n<RadixBits>(keys2, vals2, N, keys1, vals1, BitShift, histograms[i]);
         }
         else
         {
-          radix_shuffle_n<RadixBits>(exec, keys2, N, keys1, BitShift, histograms[i]);
+          radix_shuffle_n<RadixBits>(keys2, N, keys1, BitShift, histograms[i]);
         }
       }
       else
       {
         if (HasValues)
         {
-          radix_shuffle_n<RadixBits>(exec, keys1, vals1, N, keys2, vals2, BitShift, histograms[i]);
+          radix_shuffle_n<RadixBits>(keys1, vals1, N, keys2, vals2, BitShift, histograms[i]);
         }
         else
         {
-          radix_shuffle_n<RadixBits>(exec, keys1, N, keys2, BitShift, histograms[i]);
+          radix_shuffle_n<RadixBits>(keys1, N, keys2, BitShift, histograms[i]);
         }
       }
 
