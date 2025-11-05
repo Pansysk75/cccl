@@ -64,6 +64,28 @@ _CCCL_HOST_DEVICE OutputType transform_reduce(
     thrust::detail::derived_cast(thrust::detail::strip_const(exec)), first, last, unary_op, init, binary_op);
 } // end transform_reduce()
 
+_CCCL_EXEC_CHECK_DISABLE
+template <typename DerivedPolicy,
+          typename InputIterator,
+          typename OutputIterator,
+          typename UnaryFunction,
+          typename OutputType,
+          typename BinaryFunction>
+_CCCL_HOST_DEVICE void transform_reduce_into(
+  const thrust::detail::execution_policy_base<DerivedPolicy>& exec,
+  InputIterator first,
+  InputIterator last,
+  OutputIterator output,
+  UnaryFunction unary_op,
+  OutputType init,
+  BinaryFunction binary_op)
+{
+  _CCCL_NVTX_RANGE_SCOPE("thrust::transform_reduce_into");
+  using thrust::system::detail::generic::transform_reduce_into;
+  transform_reduce_into(
+    thrust::detail::derived_cast(thrust::detail::strip_const(exec)), first, last, output, unary_op, init, binary_op);
+} // end transform_reduce_into()
+
 template <typename InputIterator, typename UnaryFunction, typename OutputType, typename BinaryFunction>
 OutputType transform_reduce(
   InputIterator first, InputIterator last, UnaryFunction unary_op, OutputType init, BinaryFunction binary_op)
@@ -77,5 +99,19 @@ OutputType transform_reduce(
 
   return thrust::transform_reduce(select_system(system), first, last, unary_op, init, binary_op);
 } // end transform_reduce()
+
+template <typename InputIterator, typename OutputIterator, typename UnaryFunction, typename OutputType, typename BinaryFunction>
+void transform_reduce_into(
+  InputIterator first, InputIterator last, OutputIterator output, UnaryFunction unary_op, OutputType init, BinaryFunction binary_op)
+{
+  _CCCL_NVTX_RANGE_SCOPE("thrust::transform_reduce_into");
+  using thrust::system::detail::generic::select_system;
+
+  using System = typename thrust::iterator_system<InputIterator>::type;
+
+  System system;
+
+  thrust::transform_reduce_into(select_system(system), first, last, output, unary_op, init, binary_op);
+} // end transform_reduce_into()
 
 THRUST_NAMESPACE_END

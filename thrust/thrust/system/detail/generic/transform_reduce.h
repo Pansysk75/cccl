@@ -44,6 +44,21 @@ _CCCL_HOST_DEVICE OutputType transform_reduce(
   OutputType init,
   BinaryFunction binary_op);
 
+template <typename ExecutionPolicy,
+          typename InputIterator,
+          typename OutputIterator,
+          typename UnaryFunction,
+          typename OutputType,
+          typename BinaryFunction>
+_CCCL_HOST_DEVICE void transform_reduce_into(
+  thrust::execution_policy<ExecutionPolicy>& exec,
+  InputIterator first,
+  InputIterator last,
+  OutputIterator output,
+  UnaryFunction unary_op,
+  OutputType init,
+  BinaryFunction binary_op);
+
 }
 THRUST_NAMESPACE_END
 

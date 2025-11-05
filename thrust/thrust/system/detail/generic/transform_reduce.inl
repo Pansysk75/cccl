@@ -52,5 +52,27 @@ _CCCL_HOST_DEVICE OutputType transform_reduce(
   return thrust::reduce(exec, xfrm_first, xfrm_last, init, binary_op);
 } // end transform_reduce()
 
+
+template <typename DerivedPolicy,
+          typename InputIterator,
+          typename OutputIterator,
+          typename UnaryFunction,
+          typename OutputType,
+          typename BinaryFunction>
+_CCCL_HOST_DEVICE void transform_reduce_into(
+  thrust::execution_policy<DerivedPolicy>& exec,
+  InputIterator first,
+  InputIterator last,
+  OutputIterator output,
+  UnaryFunction unary_op,
+  OutputType init,
+  BinaryFunction binary_op)
+{
+  thrust::transform_iterator<UnaryFunction, InputIterator, OutputType> xfrm_first(first, unary_op);
+  thrust::transform_iterator<UnaryFunction, InputIterator, OutputType> xfrm_last(last, unary_op);
+
+  thrust::reduce_into(exec, xfrm_first, xfrm_last, output, init, binary_op);
+} // end transform_reduce_into()
+
 } // namespace system::detail::generic
 THRUST_NAMESPACE_END
